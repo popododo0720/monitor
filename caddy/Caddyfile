@@ -1,0 +1,27 @@
+{
+	auto_https disable_redirects
+}
+
+:3000 {
+	tls /etc/caddy/certs/server.crt /etc/caddy/certs/server.key
+	reverse_proxy 127.0.0.1:3001
+}
+
+:9443 {
+	tls /etc/caddy/certs/server.crt /etc/caddy/certs/server.key
+	reverse_proxy 127.0.0.1:9090
+}
+
+:4443 {
+	tls /etc/caddy/certs/server.crt /etc/caddy/certs/server.key
+	handle_path /prom/* {
+		reverse_proxy 127.0.0.1:9090
+	}
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8999
+	}
+	handle {
+		root * /srv/topology
+		file_server
+	}
+}

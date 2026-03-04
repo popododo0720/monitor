@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Topology</title>
+    <script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"></script>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --dim: #8b949e;
+            --blue: #58a6ff;
+            --green: #3fb950;
+            --red: #f85149;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+        #header {
+            height: 48px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 100;
+        }
+        #header h1 {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--dim);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .btn:hover { color: var(--text); border-color: var(--dim); }
+        .btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .btn.danger:hover { border-color: var(--red); color: var(--red); }
+        .sep { width: 1px; height: 20px; background: var(--border); }
+        #status {
+            font-size: 11px;
+            color: var(--dim);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #status .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            display: inline-block;
+        }
+        #status.err .dot { background: var(--red); }
+        #main {
+            display: flex;
+            height: calc(100vh - 48px);
+        }
+        #network-wrap {
+            flex: 1;
+            position: relative;
+        }
+        #network {
+            width: 100%;
+            height: 100%;
+        }
+        #sidebar {
+            width: 0;
+            overflow: hidden;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            transition: width 0.2s;
+        }
+        #sidebar.open { width: 260px; }
+        #sb-inner {
+            width: 260px;
+            padding: 16px;
+        }
+        #sb-inner h3 {
+            font-size: 14px;
+            color: var(--blue);
+            margin-bottom: 2px;
+        }
+        #sb-ip {
+            font-size: 11px;
+            color: var(--dim);
+            margin-bottom: 12px;
+            font-family: monospace;
+        }
+        .src-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 10px;
+            background: var(--bg);
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+        .src-row .lbl { color: var(--dim); }
+        .src-row .up { color: var(--green); font-weight: 600; }
+        .src-row .dn { color: var(--red); font-weight: 600; }
+        #legend {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 11px;
+            display: flex;
+            gap: 14px;
+            z-index: 10;
+        }
+        .lg-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--dim);
+        }
+        .lg-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        #hint {
+            display: none;
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--blue);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 20;
+            pointer-events: none;
+        }
+        #hint.show { display: block; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/>
+                <line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/>
+            </svg>
+            Network Topology
+        </h1>
+        <div class="toolbar">
+            <button class="btn" id="btn-add" onclick="toggleConnect()">+ 연결</button>
+            <button class="btn danger" id="btn-del" onclick="delEdge()" style="display:none">× 삭제</button>
+            <div class="sep"></div>
+            <button class="btn" onclick="exportCfg()">내보내기</button>
+            <button class="btn" onclick="document.getElementById('imp').click()">가져오기</button>
+            <input type="file" id="imp" accept=".json" style="display:none" onchange="importCfg(event)">
+            <div class="sep"></div>
+            <span id="status"><span class="dot"></span> 연결됨</span>
+        </div>
+    </div>
+    <div id="main">
+        <div id="network-wrap">
+            <div id="network"></div>
+            <div id="hint"></div>
+            <div id="legend">
+                <span class="lg-item"><span class="lg-dot" style="background:var(--green)"></span>정상</span>
+                <span class="lg-item"><span class="lg-dot" style="background:var(--red)"></span>장애</span>
+                <span class="lg-item">
+                    <svg width="18" height="11" viewBox="0 0 96 56"><rect x="3" y="3" width="90" height="50" rx="6" fill="none" stroke="var(--blue)" stroke-width="5"/></svg>
+                    네트워크
+                </span>
+                <span class="lg-item">
+                    <svg width="11" height="16" viewBox="0 0 56 80"><rect x="3" y="3" width="50" height="22" rx="4" fill="none" stroke="var(--green)" stroke-width="4"/><rect x="3" y="30" width="50" height="22" rx="4" fill="none" stroke="var(--green)" stroke-width="4"/><rect x="3" y="57" width="50" height="22" rx="4" fill="none" stroke="var(--green)" stroke-width="4"/></svg>
+                    서버
+                </span>
+            </div>
+        </div>
+        <div id="sidebar">
+            <div id="sb-inner">
+                <h3 id="sb-name"></h3>
+                <p id="sb-ip"></p>
+                <div id="sb-type"></div>
+                <div id="sb-sources"></div>
+            </div>
+        </div>
+    </div>
+<script>
+/* ========== HELPERS ========== */
+const $ = (id) => document.getElementById(id);
+
+/* ========== SVG ICONS ========== */
+function svgUri(type, color) {
+    var defs = {
+        network: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 56">'
+            + '<rect x="2" y="2" width="92" height="52" rx="6" fill="#0d1926" stroke="' + color + '" stroke-width="3"/>'
+            + '<rect x="10" y="10" width="11" height="14" rx="2" fill="' + color + '" opacity=".25"/>'
+            + '<rect x="24" y="10" width="11" height="14" rx="2" fill="' + color + '" opacity=".25"/>'
+            + '<rect x="38" y="10" width="11" height="14" rx="2" fill="' + color + '" opacity=".25"/>'
+            + '<rect x="52" y="10" width="11" height="14" rx="2" fill="' + color + '" opacity=".25"/>'
+            + '<rect x="66" y="10" width="11" height="14" rx="2" fill="' + color + '" opacity=".25"/>'
+            + '<rect x="80" y="10" width="6" height="14" rx="2" fill="' + color + '" opacity=".15"/>'
+            + '<line x1="10" y1="36" x2="30" y2="36" stroke="' + color + '" stroke-width="2" opacity=".5"/>'
+            + '<polygon points="28,33 34,36 28,39" fill="' + color + '" opacity=".5"/>'
+            + '<line x1="40" y1="36" x2="60" y2="36" stroke="' + color + '" stroke-width="2" opacity=".5"/>'
+            + '<polygon points="58,33 64,36 58,39" fill="' + color + '" opacity=".5"/>'
+            + '<circle cx="74" cy="36" r="3.5" fill="' + color + '"/>'
+            + '<circle cx="84" cy="36" r="3.5" fill="' + color + '" opacity=".5"/>'
+            + '</svg>',
+        server: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 80">'
+            + '<rect x="2" y="2" width="52" height="23" rx="4" fill="#0d1926" stroke="' + color + '" stroke-width="2.5"/>'
+            + '<rect x="2" y="29" width="52" height="23" rx="4" fill="#0d1926" stroke="' + color + '" stroke-width="2.5"/>'
+            + '<rect x="2" y="56" width="52" height="23" rx="4" fill="#0d1926" stroke="' + color + '" stroke-width="2.5"/>'
+            + '<rect x="8" y="8" width="24" height="4" rx="1.5" fill="' + color + '" opacity=".2"/>'
+            + '<rect x="8" y="14" width="16" height="4" rx="1.5" fill="' + color + '" opacity=".12"/>'
+            + '<rect x="8" y="35" width="24" height="4" rx="1.5" fill="' + color + '" opacity=".2"/>'
+            + '<rect x="8" y="41" width="16" height="4" rx="1.5" fill="' + color + '" opacity=".12"/>'
+            + '<rect x="8" y="62" width="24" height="4" rx="1.5" fill="' + color + '" opacity=".2"/>'
+            + '<rect x="8" y="68" width="16" height="4" rx="1.5" fill="' + color + '" opacity=".12"/>'
+            + '<circle cx="44" cy="10" r="3" fill="' + color + '"/>'
+            + '<circle cx="44" cy="37" r="3" fill="' + color + '"/>'
+            + '<circle cx="44" cy="64" r="3" fill="' + color + '"/>'
+            + '</svg>',
+    };
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(defs[type]);
+}
+
+/* Pre-cache: network=blue, server=green, down=red */
+var ICONS = {};
+ICONS['network-up'] = svgUri('network', '#58a6ff');
+ICONS['network-dn'] = svgUri('network', '#f85149');
+ICONS['server-up'] = svgUri('server', '#3fb950');
+ICONS['server-dn'] = svgUri('server', '#f85149');
+['network-up','network-dn','server-up','server-dn'].forEach(function(k) {
+    var img = new Image(); img.src = ICONS[k];
+});
+
+/* ========== CONSTANTS ========== */
+var PROM = '/prom';
+var REFRESH = 15000;
+var SRC_NAMES = { ping: 'Ping (ICMP)', http: 'HTTP', node: 'Node Exporter', snmp: 'SNMP' };
+var DEFAULT_EDGES = [
+    ['192.168.0.1','192.168.0.2'], ['192.168.0.1','192.168.0.5'], ['192.168.0.1','192.168.0.6'],
+    ['192.168.0.2','192.168.0.3'], ['192.168.0.2','192.168.0.11'],
+    ['192.168.0.5','192.168.0.11'], ['192.168.0.6','192.168.0.7'],
+    ['192.168.0.11','192.168.0.8'], ['192.168.0.11','192.168.0.9'], ['192.168.0.11','192.168.0.10'],
+    ['192.168.0.11','192.168.0.216'], ['192.168.0.11','192.168.0.44'],
+    ['192.168.0.6','192.168.0.235'], ['192.168.0.6','192.168.0.236'],
+    ['192.168.0.3','192.168.0.40'], ['192.168.0.3','192.168.0.217'],
+    ['192.168.0.7','192.168.0.224'], ['192.168.0.7','192.168.0.230'],
+];
+
+/* ========== STATE ========== */
+var devices = {};
+var net = null;
+var nodes = null;
+var edges = null;
+var connecting = false;
+var connFrom = null;
+var selNode = null;
+var saveTimer = null;
+var guideLines = [];
+var guideSpacing = [];
+var SNAP_DIST = 6;
+var SPACING_PCT = 0.20;
+var SPACING_TOL = 120;
+
+/* ========== PROMETHEUS ========== */
+function fetchDevices() {
+    var qs = [
+        { q: 'probe_success{job="blackbox-icmp"}', s: 'ping' },
+        { q: 'probe_success{job="blackbox-http"}', s: 'http' },
+        { q: 'up{job="node-exporter"}', s: 'node' },
+        { q: 'up{job="snmp"}', s: 'snmp' },
+    ];
+    var devs = {};
+    return Promise.all(qs.map(function(item) {
+        return fetch(PROM + '/api/v1/query?query=' + encodeURIComponent(item.q))
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                if (d.status !== 'success') return;
+                d.data.result.forEach(function(m) {
+                    var ip = m.metric.instance.replace(/^https?:\/\//, '').replace(/:.*$/, '');
+                    if (!devs[ip]) devs[ip] = { ip: ip, sources: {} };
+                    devs[ip].sources[item.s] = parseFloat(m.value[1]);
+                });
+            })
+            .catch(function(e) { console.warn('fetch ' + item.s + ':', e); });
+    })).then(function() { return devs; });
+}
+
+function classify(dev) {
+    return ('http' in dev.sources || 'node' in dev.sources) ? 'server' : 'network';
+}
+
+function isUp(dev) {
+    var v = Object.values(dev.sources);
+    return v.length > 0 && v.every(function(x) { return x === 1; });
+}
+
+/* ========== CONFIG (Server-side) ========== */
+function loadCfg() {
+    return fetch('/api/config')
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(d) { return (d && Object.keys(d).length) ? d : null; })
+        .catch(function() { return null; });
+}
+
+function saveCfg() {
+    if (!net) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function() {
+        var pos = net.getPositions();
+        var edgeList = edges.get().map(function(e) { return [e.from, e.to]; });
+        var labels = {};
+        nodes.get().forEach(function(n) { if (n._label) labels[n.id] = n._label; });
+        fetch('/api/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ positions: pos, edges: edgeList, labels: labels })
+        }).catch(function() {});
+    }, 500);
+}
+
+/* ========== NETWORK INIT ========== */
+function initApp() {
+    var statusEl = $('status');
+    fetchDevices()
+        .then(function(devs) {
+            if (!Object.keys(devs).length) {
+                statusEl.className = 'err';
+                statusEl.innerHTML = '<span class="dot"></span> 데이터 없음';
+                return;
+            }
+            devices = devs;
+            return loadCfg().then(function(cfg) { buildNetwork(devs, cfg); });
+        })
+        .catch(function() {
+            statusEl.className = 'err';
+            statusEl.innerHTML = '<span class="dot"></span> 연결 실패';
+        });
+}
+
+function buildNetwork(devs, cfg) {
+    var ips = Object.keys(devs).sort();
+    var cols = Math.ceil(Math.sqrt(ips.length));
+
+    var nodeArr = ips.map(function(ip, i) {
+        var dev = devs[ip];
+        var type = classify(dev);
+        var up = isUp(dev);
+        var customLabel = cfg && cfg.labels && cfg.labels[ip];
+        var label = customLabel || ip;
+        var x, y;
+        if (cfg && cfg.positions && cfg.positions[ip]) {
+            x = cfg.positions[ip].x;
+            y = cfg.positions[ip].y;
+        } else {
+            x = (i % cols - cols / 2) * 160;
+            y = Math.floor(i / cols) * 160;
+        }
+        return {
+            id: ip,
+            label: label,
+            image: ICONS[type + (up ? '-up' : '-dn')],
+            shape: 'image',
+            size: type === 'network' ? 30 : 26,
+            x: x, y: y,
+            font: { color: '#c9d1d9', size: 11, face: 'monospace' },
+            shapeProperties: { interpolation: false, useImageSize: false },
+            _type: type,
+            _label: customLabel || null,
+        };
+    });
+
+    var edgeList = (cfg && cfg.edges) ? cfg.edges : DEFAULT_EDGES;
+    var edgeArr = edgeList
+        .filter(function(e) { return devs[e[0]] && devs[e[1]]; })
+        .map(function(e) {
+            return {
+                id: e[0] + '>' + e[1],
+                from: e[0], to: e[1],
+                arrows: { to: { enabled: true, scaleFactor: 0.7 } },
+                color: { color: '#30363d', highlight: '#58a6ff', hover: '#58a6ff' },
+                width: 2, smooth: false,
+            };
+        });
+
+    nodes = new vis.DataSet(nodeArr);
+    edges = new vis.DataSet(edgeArr);
+
+    net = new vis.Network($('network'), { nodes: nodes, edges: edges }, {
+        physics: { enabled: false, stabilization: false },
+        interaction: { dragNodes: true, dragView: true, zoomView: true, hover: true, multiselect: true },
+        edges: {
+            arrows: { to: { enabled: true, scaleFactor: 0.7 } },
+            color: { color: '#30363d', highlight: '#58a6ff', hover: '#58a6ff' },
+            width: 2, smooth: false,
+        },
+    });
+
+    net.on('click', onClick);
+    net.on('doubleClick', onDblClick);
+    net.on('select', function(p) {
+        if (p.edges.length && !connecting) {
+            $('btn-del').style.display = '';
+            $('btn-del').textContent = p.edges.length > 1
+                ? '\u00d7 ' + p.edges.length + '\uac1c \uc0ad\uc81c'
+                : '\u00d7 \uc0ad\uc81c';
+        } else {
+            $('btn-del').style.display = 'none';
+        }
+    });
+
+    /* Alignment + spacing guides during drag */
+    net.on('dragging', function(p) {
+        if (p.nodes.length !== 1) { guideLines = []; guideSpacing = []; return; }
+        var dragId = p.nodes[0];
+        var allPos = net.getPositions();
+        var dragPos = allPos[dragId];
+        if (!dragPos) return;
+        guideLines = [];
+        guideSpacing = [];
+        var bestDx = SNAP_DIST, bestDy = SNAP_DIST;
+        var others = [];
+
+        Object.keys(allPos).forEach(function(id) {
+            if (id === dragId) return;
+            var op = allPos[id];
+            others.push(op);
+            var dx = Math.abs(dragPos.x - op.x);
+            var dy = Math.abs(dragPos.y - op.y);
+            if (dx < bestDx) {
+                guideLines = guideLines.filter(function(g) { return g.axis !== 'v'; });
+                guideLines.push({ axis: 'v', val: op.x });
+                bestDx = dx;
+            } else if (dx === bestDx && dx < SNAP_DIST) {
+                guideLines.push({ axis: 'v', val: op.x });
+            }
+            if (dy < bestDy) {
+                guideLines = guideLines.filter(function(g) { return g.axis !== 'h'; });
+                guideLines.push({ axis: 'h', val: op.y });
+                bestDy = dy;
+            } else if (dy === bestDy && dy < SNAP_DIST) {
+                guideLines.push({ axis: 'h', val: op.y });
+            }
+        });
+
+        /* Equal spacing detection — scan all consecutive triples in sorted rows/columns */
+        // Horizontal: nodes roughly on same Y
+        var hRow = [{x: dragPos.x, y: dragPos.y, isDrag: true}];
+        others.forEach(function(op) {
+            if (Math.abs(dragPos.y - op.y) < SPACING_TOL) {
+                hRow.push({x: op.x, y: op.y, isDrag: false});
+            }
+        });
+        hRow.sort(function(a, b) { return a.x - b.x; });
+        if (hRow.length >= 3) {
+            for (var hi = 0; hi < hRow.length - 2; hi++) {
+                var ha = hRow[hi], hb = hRow[hi+1], hc = hRow[hi+2];
+                if (!(ha.isDrag || hb.isDrag || hc.isDrag)) continue;
+                var hg1 = hb.x - ha.x, hg2 = hc.x - hb.x;
+                if (hg1 > 30 && hg2 > 30 && Math.abs(hg1 - hg2) < Math.max(12, (hg1 + hg2) / 2 * SPACING_PCT)) {
+                    var hSnapX = hb.isDrag ? (ha.x + hc.x) / 2
+                               : ha.isDrag ? hb.x - hg2
+                               : hb.x + hg1;
+                    guideSpacing.push({
+                        axis: 'h',
+                        x1: ha.x, x2: hb.x, x3: hc.x,
+                        y1: ha.y, y2: hb.y, y3: hc.y,
+                        snap: hSnapX
+                    });
+                }
+            }
+        }
+        // Vertical: nodes roughly on same X
+        var vCol = [{x: dragPos.x, y: dragPos.y, isDrag: true}];
+        others.forEach(function(op) {
+            if (Math.abs(dragPos.x - op.x) < SPACING_TOL) {
+                vCol.push({x: op.x, y: op.y, isDrag: false});
+            }
+        });
+        vCol.sort(function(a, b) { return a.y - b.y; });
+        if (vCol.length >= 3) {
+            for (var vi = 0; vi < vCol.length - 2; vi++) {
+                var va = vCol[vi], vb = vCol[vi+1], vc = vCol[vi+2];
+                if (!(va.isDrag || vb.isDrag || vc.isDrag)) continue;
+                var vg1 = vb.y - va.y, vg2 = vc.y - vb.y;
+                if (vg1 > 30 && vg2 > 30 && Math.abs(vg1 - vg2) < Math.max(12, (vg1 + vg2) / 2 * SPACING_PCT)) {
+                    var vSnapY = vb.isDrag ? (va.y + vc.y) / 2
+                               : va.isDrag ? vb.y - vg2
+                               : vb.y + vg1;
+                    guideSpacing.push({
+                        axis: 'v',
+                        x1: va.x, x2: vb.x, x3: vc.x,
+                        y1: va.y, y2: vb.y, y3: vc.y,
+                        snap: vSnapY
+                    });
+                }
+            }
+        }
+        net.redraw();
+    });
+
+    net.on('afterDrawing', function(ctx) {
+        var canvas = net.canvas.frame.canvas;
+        var scale = net.getScale();
+        var vp = net.getViewPosition();
+        var hw = canvas.width / (2 * scale);
+        var hh = canvas.height / (2 * scale);
+        var inv = 1 / scale;
+
+        if (guideLines.length) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(88, 166, 255, 0.6)';
+            ctx.lineWidth = inv;
+            ctx.setLineDash([6 * inv, 4 * inv]);
+            guideLines.forEach(function(g) {
+                ctx.beginPath();
+                if (g.axis === 'v') {
+                    ctx.moveTo(g.val, vp.y - hh);
+                    ctx.lineTo(g.val, vp.y + hh);
+                } else {
+                    ctx.moveTo(vp.x - hw, g.val);
+                    ctx.lineTo(vp.x + hw, g.val);
+                }
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+
+        if (guideSpacing.length) {
+            ctx.save();
+            var cap = 14 * inv;
+            guideSpacing.forEach(function(s) {
+                if (s.axis === 'h') {
+                    var ly = s.y1 - 50 * inv;
+                    var ry = s.y3 - 50 * inv;
+                    var my = Math.min(ly, ry);
+                    ctx.strokeStyle = 'rgba(255, 150, 50, 0.9)';
+                    ctx.lineWidth = 2 * inv;
+                    ctx.setLineDash([5 * inv, 3 * inv]);
+                    ctx.beginPath();
+                    ctx.moveTo(s.x1, my); ctx.lineTo(s.x2, my);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(s.x2, my); ctx.lineTo(s.x3, my);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.lineWidth = 2 * inv;
+                    ctx.beginPath();
+                    ctx.moveTo(s.x1, my - cap); ctx.lineTo(s.x1, my + cap);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(s.x2, my - cap); ctx.lineTo(s.x2, my + cap);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(s.x3, my - cap); ctx.lineTo(s.x3, my + cap);
+                    ctx.stroke();
+                } else {
+                    var lx = s.x1 - 50 * inv;
+                    var rx = s.x3 - 50 * inv;
+                    var mx = Math.min(lx, rx);
+                    ctx.strokeStyle = 'rgba(255, 150, 50, 0.9)';
+                    ctx.lineWidth = 2 * inv;
+                    ctx.setLineDash([5 * inv, 3 * inv]);
+                    ctx.beginPath();
+                    ctx.moveTo(mx, s.y1); ctx.lineTo(mx, s.y2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(mx, s.y2); ctx.lineTo(mx, s.y3);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.lineWidth = 2 * inv;
+                    ctx.beginPath();
+                    ctx.moveTo(mx - cap, s.y1); ctx.lineTo(mx + cap, s.y1);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(mx - cap, s.y2); ctx.lineTo(mx + cap, s.y2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(mx - cap, s.y3); ctx.lineTo(mx + cap, s.y3);
+                    ctx.stroke();
+                }
+            });
+            ctx.restore();
+        }
+    });
+
+    net.on('dragEnd', function(p) {
+        if (p.nodes.length === 1) {
+            var dragId = p.nodes[0];
+            var allPos = net.getPositions();
+            var pos = allPos[dragId];
+            if (!pos) { guideLines = []; guideSpacing = []; return; }
+            var update = { id: dragId, x: pos.x, y: pos.y };
+            var snapped = false;
+            var alignedX = false, alignedY = false;
+
+            /* 1) Center alignment snap (highest priority) */
+            guideLines.forEach(function(g) {
+                if (g.axis === 'v') { update.x = g.val; snapped = true; alignedX = true; }
+                if (g.axis === 'h') { update.y = g.val; snapped = true; alignedY = true; }
+            });
+
+            /* 2) Spacing snap — only on axes NOT already center-aligned */
+            var endOthers = [];
+            Object.keys(allPos).forEach(function(id) {
+                if (id !== dragId) endOthers.push({ x: allPos[id].x, y: allPos[id].y });
+            });
+            // Horizontal spacing → snaps X (skip if center-aligned X)
+            if (!alignedX) {
+                var ehRow = [{ x: pos.x, y: pos.y, isDrag: true }];
+                endOthers.forEach(function(op) {
+                    if (Math.abs(pos.y - op.y) < SPACING_TOL) ehRow.push({ x: op.x, y: op.y, isDrag: false });
+                });
+                ehRow.sort(function(a, b) { return a.x - b.x; });
+                if (ehRow.length >= 3) {
+                    for (var ei = 0; ei < ehRow.length - 2; ei++) {
+                        var ea = ehRow[ei], eb = ehRow[ei+1], ec = ehRow[ei+2];
+                        if (!(ea.isDrag || eb.isDrag || ec.isDrag)) continue;
+                        var eg1 = eb.x - ea.x, eg2 = ec.x - eb.x;
+                        if (eg1 > 30 && eg2 > 30 && Math.abs(eg1 - eg2) < Math.max(12, (eg1 + eg2) / 2 * SPACING_PCT)) {
+                            update.x = eb.isDrag ? (ea.x + ec.x) / 2
+                                     : ea.isDrag ? eb.x - eg2
+                                     : eb.x + eg1;
+                            snapped = true;
+                        }
+                    }
+                }
+            }
+            // Vertical spacing → snaps Y (skip if center-aligned Y)
+            if (!alignedY) {
+                var evCol = [{ x: pos.x, y: pos.y, isDrag: true }];
+                endOthers.forEach(function(op) {
+                    if (Math.abs(pos.x - op.x) < SPACING_TOL) evCol.push({ x: op.x, y: op.y, isDrag: false });
+                });
+                evCol.sort(function(a, b) { return a.y - b.y; });
+                if (evCol.length >= 3) {
+                    for (var ej = 0; ej < evCol.length - 2; ej++) {
+                        var va2 = evCol[ej], vb2 = evCol[ej+1], vc2 = evCol[ej+2];
+                        if (!(va2.isDrag || vb2.isDrag || vc2.isDrag)) continue;
+                        var vg12 = vb2.y - va2.y, vg22 = vc2.y - vb2.y;
+                        if (vg12 > 30 && vg22 > 30 && Math.abs(vg12 - vg22) < Math.max(12, (vg12 + vg22) / 2 * SPACING_PCT)) {
+                            update.y = vb2.isDrag ? (va2.y + vc2.y) / 2
+                                     : va2.isDrag ? vb2.y - vg22
+                                     : vb2.y + vg12;
+                            snapped = true;
+                        }
+                    }
+                }
+            }
+
+            if (snapped) nodes.update(update);
+        }
+        guideLines = [];
+        guideSpacing = [];
+        if (p.nodes.length) saveCfg();
+    });
+
+    setInterval(refresh, REFRESH);
+}
+
+function refresh() {
+    fetchDevices()
+        .then(function(devs) {
+            devices = devs;
+            var updates = [];
+            Object.keys(devs).forEach(function(ip) {
+                var dev = devs[ip];
+                var type = classify(dev);
+                var up = isUp(dev);
+                var existing = nodes.get(ip);
+                if (existing) {
+                    updates.push({ id: ip, image: ICONS[type + (up ? '-up' : '-dn')], _type: type });
+                } else {
+                    nodes.add({
+                        id: ip, label: ip,
+                        image: ICONS[type + (up ? '-up' : '-dn')],
+                        shape: 'image', size: type === 'network' ? 30 : 26,
+                        x: Math.random() * 500 - 250, y: Math.random() * 500 - 250,
+                        font: { color: '#c9d1d9', size: 11, face: 'monospace' },
+                        shapeProperties: { interpolation: false, useImageSize: false },
+                        _type: type,
+                    });
+                }
+            });
+            if (updates.length) nodes.update(updates);
+            if (selNode && devices[selNode]) showDetail(selNode);
+            $('status').className = '';
+            $('status').innerHTML = '<span class="dot"></span> 연결됨';
+        })
+        .catch(function() {
+            $('status').className = 'err';
+            $('status').innerHTML = '<span class="dot"></span> 연결 끊김';
+        });
+}
+
+/* ========== EVENTS ========== */
+function onClick(p) {
+    if (connecting) {
+        if (p.nodes.length) {
+            var nid = p.nodes[0];
+            if (!connFrom) {
+                connFrom = nid;
+                net.selectNodes([nid]);
+                $('hint').textContent = '도착 노드를 클릭하세요 (ESC 취소)';
+            } else if (nid !== connFrom) {
+                var eid = connFrom + '>' + nid;
+                if (!edges.get(eid)) {
+                    edges.add({
+                        id: eid, from: connFrom, to: nid,
+                        arrows: { to: { enabled: true, scaleFactor: 0.7 } },
+                        color: { color: '#30363d', highlight: '#58a6ff', hover: '#58a6ff' },
+                        width: 2, smooth: false,
+                    });
+                    saveCfg();
+                }
+                exitConnect();
+            }
+        }
+        return;
+    }
+    if (p.nodes.length) {
+        showDetail(p.nodes[0]);
+    } else {
+        closeSidebar();
+    }
+}
+
+function onDblClick(p) {
+    if (p.nodes.length && !connecting) {
+        var nid = p.nodes[0];
+        var node = nodes.get(nid);
+        var cur = node._label || node.label;
+        var v = prompt('라벨 수정:', cur);
+        if (v !== null && v.trim()) {
+            nodes.update({ id: nid, label: v.trim(), _label: v.trim() });
+            saveCfg();
+        }
+    }
+}
+
+/* ========== CONNECT MODE ========== */
+function toggleConnect() {
+    connecting ? exitConnect() : enterConnect();
+}
+
+function enterConnect() {
+    connecting = true;
+    connFrom = null;
+    $('btn-add').classList.add('active');
+    $('hint').textContent = '출발 노드를 클릭하세요 (ESC 취소)';
+    $('hint').classList.add('show');
+}
+
+function exitConnect() {
+    connecting = false;
+    connFrom = null;
+    $('btn-add').classList.remove('active');
+    $('hint').classList.remove('show');
+    if (net) net.unselectAll();
+}
+
+function delEdge() {
+    var sel = net.getSelectedEdges();
+    if (sel.length) { edges.remove(sel); saveCfg(); }
+    $('btn-del').style.display = 'none';
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && connecting) exitConnect();
+});
+
+/* ========== SIDEBAR ========== */
+function showDetail(ip) {
+    selNode = ip;
+    var dev = devices[ip];
+    if (!dev) return;
+    var node = nodes.get(ip);
+    var type = classify(dev);
+    $('sb-name').textContent = node ? node.label : ip;
+    $('sb-ip').textContent = ip;
+    $('sb-type').innerHTML = '<div class="src-row"><span class="lbl">분류</span><span>'
+        + (type === 'network' ? '네트워크' : '서버') + '</span></div>';
+    var html = '';
+    Object.keys(dev.sources).forEach(function(s) {
+        var v = dev.sources[s];
+        var cls = v === 1 ? 'up' : 'dn';
+        var txt = v === 1 ? 'UP' : 'DOWN';
+        html += '<div class="src-row"><span class="lbl">' + (SRC_NAMES[s] || s)
+            + '</span><span class="' + cls + '">' + txt + '</span></div>';
+    });
+    $('sb-sources').innerHTML = html;
+    $('sidebar').classList.add('open');
+}
+
+function closeSidebar() {
+    selNode = null;
+    $('sidebar').classList.remove('open');
+}
+
+/* ========== EXPORT / IMPORT ========== */
+function exportCfg() {
+    if (!net) return;
+    var pos = net.getPositions();
+    var edgeList = edges.get().map(function(e) { return [e.from, e.to]; });
+    var labels = {};
+    nodes.get().forEach(function(n) { if (n._label) labels[n.id] = n._label; });
+    var blob = new Blob(
+        [JSON.stringify({ positions: pos, edges: edgeList, labels: labels }, null, 2)],
+        { type: 'application/json' }
+    );
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'topology-config.json';
+    a.click();
+}
+
+function importCfg(ev) {
+    var f = ev.target.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function() {
+        try {
+            var d = JSON.parse(reader.result);
+            fetch('/api/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(d)
+            }).then(function() { location.reload(); });
+        } catch (e) { alert('잘못된 파일'); }
+    };
+    reader.readAsText(f);
+    ev.target.value = '';
+}
+
+/* ========== START ========== */
+initApp();
+</script>
+</body>
+</html>

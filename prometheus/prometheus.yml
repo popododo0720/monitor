@@ -1,0 +1,87 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# ============================================================
+# Scrape Jobs
+# ============================================================
+
+scrape_configs:
+
+  # ----------------------------------------------------------
+  # Prometheus 자기 자신
+  # ----------------------------------------------------------
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ----------------------------------------------------------
+  # Node Exporter (서버 모니터링)
+  # targets/servers.yml 에서 타겟 관리
+  # ----------------------------------------------------------
+  - job_name: 'node-exporter'
+    file_sd_configs:
+      - files:
+          - '/etc/prometheus/targets/servers.yml'
+        refresh_interval: 30s
+
+  # ----------------------------------------------------------
+  # Blackbox - ICMP Ping
+  # ----------------------------------------------------------
+  - job_name: 'blackbox-icmp'
+    metrics_path: /probe
+    params:
+      module: [icmp]
+    file_sd_configs:
+      - files:
+          - '/etc/prometheus/targets/ping_*.yml'
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9115
+
+  # ----------------------------------------------------------
+  # Blackbox - HTTP 체크
+  # ----------------------------------------------------------
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    file_sd_configs:
+      - files:
+          - '/etc/prometheus/targets/http_targets.yml'
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9115
+
+  # ----------------------------------------------------------
+  # SNMP (스위치, 라우터, AP 등 네트워크 장비)
+  # targets/snmp_*.yml 에서 타겟 관리
+  # ----------------------------------------------------------
+  - job_name: 'snmp'
+    scrape_interval: 30s  # SNMP는 좀 느릴 수 있어서 넉넉하게
+    scrape_timeout: 20s
+    metrics_path: /snmp
+    params:
+      auth: [public_v2]
+      module: [if_mib]
+    file_sd_configs:
+      - files:
+          - '/etc/prometheus/targets/snmp_*.yml'
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:9116

@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://127.0.0.1:9090/api/v1/targets)",
+      "Bash(python3 -c \":*)",
+      "Bash(curl -s \"http://127.0.0.1:9090/api/v1/query?query=probe_success\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s \"http://127.0.0.1:9090/api/v1/query?query=ifOperStatus\")",
+      "Bash(curl -s \"http://127.0.0.1:9090/api/v1/label/job/values\")",
+      "Bash(curl -s \"http://127.0.0.1:9090/api/v1/label/__name__/values\")",
+      "Bash(curl -s \"http://127.0.0.1:9090/api/v1/query?query=ifHCInOctets\")",
+      "Bash(curl -s \"http://127.0.0.1:3001/api/datasources/proxy/1/api/v1/query?query=probe_success\" -u rhksfl:rhksfl)",
+      "Bash(curl -s \"http://127.0.0.1:3001/api/datasources/proxy/1/api/v1/label/instance/values?match[]=probe_success\" -u rhksfl:rhksfl)",
+      "Bash(curl -s \"http://127.0.0.1:3001/api/search?type=dash-db\" -u rhksfl:rhksfl)",
+      "Bash(curl -s \"http://127.0.0.1:3001/api/dashboards/uid/xtkCtBkiz\" -u rhksfl:rhksfl)",
+      "Bash(curl -s -X POST \"http://127.0.0.1:3001/api/dashboards/db\" -u rhksfl:rhksfl -H \"Content-Type: application/json\" -d @-)",
+      "Bash(docker compose down prometheus)",
+      "Bash(docker volume rm monitor_prometheus_data)",
+      "Bash(docker compose up -d prometheus)",
+      "Bash(curl -s \"http://127.0.0.1:9090/api/v1/label/instance/values?match[]=probe_success\")",
+      "Bash(curl -s -X POST \"http://127.0.0.1:3001/api/dashboards/db\" -u rhksfl:rhksfl -H \"Content-Type: application/json\" -d @/tmp/bb_dashboard_fixed.json)",
+      "Bash(curl -s -X POST \"http://127.0.0.1:3001/api/dashboards/db\" -u rhksfl:rhksfl -H \"Content-Type: application/json\" -d @/tmp/smoke_dashboard_fixed.json)",
+      "Bash(curl -s \"http://127.0.0.1:3001/api/dashboards/uid/L4MYHlW4z\" -u rhksfl:rhksfl)",
+      "Bash(python3:*)",
+      "Bash(curl -s -X POST \"http://127.0.0.1:3001/api/dashboards/db\" -u rhksfl:rhksfl -H \"Content-Type: application/json\" -d @/tmp/smoke2_fixed.json)",
+      "Bash(curl -s -u rhksfl:rhksfl http://127.0.0.1:3001/api/dashboards/uid/L4MYHlW4z)",
+      "Bash(curl -s -u rhksfl:rhksfl 'http://127.0.0.1:3001/api/datasources')",
+      "Bash(curl -s 'http://127.0.0.1:9090/api/v1/label/job/values')",
+      "Bash(curl:*)",
+      "Bash(docker exec:*)",
+      "Bash(tr:*)"
+    ]
+  }
+}
