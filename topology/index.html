@@ -526,6 +526,30 @@ function buildNetwork(devs, cfg) {
         net.redraw();
     });
 
+    /* Pulse glow behind DOWN nodes */
+    net.on('beforeDrawing', function(ctx) {
+        var t = Date.now() * 0.004;
+        var pulse = 0.12 + 0.14 * Math.sin(t);
+        var rad = 38 + 10 * Math.sin(t);
+        var inv = 1 / net.getScale();
+        Object.keys(devices).forEach(function(ip) {
+            if (isUp(devices[ip])) return;
+            var pos = net.getPositions([ip])[ip];
+            if (!pos) return;
+            ctx.save();
+            ctx.beginPath();
+            var r = rad * inv;
+            var grad = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, r);
+            grad.addColorStop(0, 'rgba(248, 81, 73, ' + (pulse + 0.1) + ')');
+            grad.addColorStop(0.6, 'rgba(248, 81, 73, ' + pulse + ')');
+            grad.addColorStop(1, 'rgba(248, 81, 73, 0)');
+            ctx.fillStyle = grad;
+            ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+    });
+
     net.on('afterDrawing', function(ctx) {
         var canvas = net.canvas.frame.canvas;
         var scale = net.getScale();
@@ -683,6 +707,7 @@ function buildNetwork(devs, cfg) {
     });
 
     setInterval(refresh, REFRESH);
+    setInterval(function() { if (net) net.redraw(); }, 80);
 }
 
 function refresh() {
