@@ -1,6 +1,6 @@
 services:
   caddy:
-    image: caddy:latest
+    image: caddy:2.11.1
     container_name: caddy
     network_mode: host
     volumes:
@@ -12,12 +12,13 @@ services:
     restart: unless-stopped
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.10.0
     container_name: prometheus
     network_mode: host
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./prometheus/targets:/etc/prometheus/targets:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -27,7 +28,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:12.4.0
     container_name: grafana
     network_mode: host
     environment:
@@ -39,10 +40,25 @@ services:
       - GF_SECURITY_ALLOW_EMBEDDING=true
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.29.0
+    container_name: alertmanager
+    network_mode: host
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.listen-address=127.0.0.1:9093'
     restart: unless-stopped
 
   blackbox-exporter:
-    image: prom/blackbox-exporter:latest
+    image: prom/blackbox-exporter:v0.28.0
     container_name: blackbox-exporter
     network_mode: host
     command:
@@ -53,7 +69,7 @@ services:
     restart: unless-stopped
 
   snmp-exporter:
-    image: prom/snmp-exporter:latest
+    image: prom/snmp-exporter:v0.30.1
     container_name: snmp-exporter
     network_mode: host
     command:
@@ -67,3 +83,4 @@ volumes:
   prometheus_data:
   grafana_data:
   caddy_data:
+  alertmanager_data:

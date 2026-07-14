@@ -1,0 +1,34 @@
+groups:
+  - name: infra-alerts
+    rules:
+      - alert: PrometheusTargetDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Target down: {{ $labels.instance }}"
+          description: "{{ $labels.job }} target {{ $labels.instance }} has been down for more than 2 minutes."
+
+      - alert: BlackboxProbeFailed
+        expr: probe_success == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Probe failed: {{ $labels.instance }}"
+          description: "{{ $labels.job }} probe for {{ $labels.instance }} has failed for more than 2 minutes."
+
+      - alert: NodeFilesystemAlmostFull
+        expr: |
+          (
+            node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs|squashfs|overlay"}
+            /
+            node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs|squashfs|overlay"}
+          ) * 100 < 10
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk almost full: {{ $labels.instance }} {{ $labels.mountpoint }}"
+          description: "{{ $labels.instance }} mount {{ $labels.mountpoint }} has less than 10% free space."

@@ -12,6 +12,11 @@
 	reverse_proxy 127.0.0.1:9090
 }
 
+:9444 {
+	tls /etc/caddy/certs/server.crt /etc/caddy/certs/server.key
+	reverse_proxy 127.0.0.1:9093
+}
+
 :4443 {
 	tls /etc/caddy/certs/server.crt /etc/caddy/certs/server.key
 	handle_path /prom/* {
