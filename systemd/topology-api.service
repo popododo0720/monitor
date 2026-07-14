@@ -1,0 +1,12 @@
+[Unit]
+Description=Topology Config API
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /root/monitor/topology/api.py
+WorkingDirectory=/root/monitor/topology
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
