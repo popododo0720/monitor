@@ -322,8 +322,10 @@ function prometheusGroup(dev) {
         .map(function(source) { return groups[source]; })
         .filter(function(group) { return group; });
     if (!values.length) return null;
-    if (values.every(function(group) { return group === values[0]; })) return values[0];
-    // Conflicting source labels follow a fixed priority instead of request completion order.
+    var server = values.find(function(group) { return group.toLowerCase() === 'server'; });
+    var network = values.find(function(group) { return group.toLowerCase() === 'network'; });
+    if (server && network) return server;
+    // Other conflicting labels follow the fixed source priority.
     return values[0];
 }
 
