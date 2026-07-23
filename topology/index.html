@@ -305,15 +305,34 @@ function fetchDevices() {
                 if (d.status !== 'success') return;
                 d.data.result.forEach(function(m) {
                     var ip = m.metric.instance.replace(/^https?:\/\//, '').replace(/:.*$/, '');
-                    if (!devs[ip]) devs[ip] = { ip: ip, sources: {} };
+                    if (!devs[ip]) devs[ip] = { ip: ip, sources: {}, sourceGroups: {} };
                     devs[ip].sources[item.s] = parseFloat(m.value[1]);
+                    if (m.metric.group) devs[ip].sourceGroups[item.s] = m.metric.group;
                 });
             })
             .catch(function(e) { console.warn('fetch ' + item.s + ':', e); });
     })).then(function() { return devs; });
 }
 
+var GROUP_SOURCE_PRIORITY = ['node', 'http', 'snmp', 'ping'];
+
+function prometheusGroup(dev) {
+    var groups = dev.sourceGroups || {};
+    var values = GROUP_SOURCE_PRIORITY
+        .map(function(source) { return groups[source]; })
+        .filter(function(group) { return group; });
+    if (!values.length) return null;
+    if (values.every(function(group) { return group === values[0]; })) return values[0];
+    // Conflicting source labels follow a fixed priority instead of request completion order.
+    return values[0];
+}
+
 function classify(dev) {
+    var group = prometheusGroup(dev);
+    if (group) {
+        var normalized = group.toLowerCase();
+        if (normalized === 'server' || normalized === 'network') return normalized;
+    }
     return ('http' in dev.sources || 'node' in dev.sources) ? 'server' : 'network';
 }
 
@@ -828,10 +847,12 @@ function showDetail(ip) {
     if (!dev) return;
     var node = nodes.get(ip);
     var type = classify(dev);
+    var group = prometheusGroup(dev) || type;
     $('sb-name').textContent = node ? node.label : ip;
     $('sb-ip').textContent = ip;
-    $('sb-type').innerHTML = '<div class="src-row"><span class="lbl">분류</span><span>'
-        + (type === 'network' ? '네트워크' : '서버') + '</span></div>';
+    $('sb-type').innerHTML = '<div class="src-row"><span class="lbl">분류</span>'
+        + '<span data-group-value></span></div>';
+    $('sb-type').querySelector('[data-group-value]').textContent = group;
     var html = '';
     Object.keys(dev.sources).forEach(function(s) {
         var v = dev.sources[s];
