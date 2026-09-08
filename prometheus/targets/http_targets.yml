@@ -4,4 +4,4 @@
     - https://210.125.134.91
     - https://210.125.134.97
   labels:
-    group: server
+    group: linux
