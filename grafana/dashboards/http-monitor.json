@@ -108,7 +108,7 @@
           "datasource": {
             "uid": "cfev45eb9c9hcc"
           },
-          "expr": "probe_duration_seconds{job=\"blackbox-http\",instance=~\"$target\"}",
+          "expr": "max without (group) (\nprobe_duration_seconds{job=\"blackbox-http\",instance=~\"$target\"}\n)",
           "format": "time_series",
           "interval": "$interval",
           "intervalFactor": 1,
@@ -219,7 +219,7 @@
           "datasource": {
             "uid": "cfev45eb9c9hcc"
           },
-          "expr": "probe_success{job=\"blackbox-http\",instance=~\"$target\"}",
+          "expr": "max without (group) (\nprobe_success{job=\"blackbox-http\",instance=~\"$target\"}\n)",
           "format": "time_series",
           "interval": "$interval",
           "intervalFactor": 1,
@@ -316,7 +316,7 @@
           "datasource": {
             "uid": "cfev45eb9c9hcc"
           },
-          "expr": "probe_http_duration_seconds{job=\"blackbox-http\",instance=~\"$target\"}",
+          "expr": "max without (group) (\nprobe_http_duration_seconds{job=\"blackbox-http\",instance=~\"$target\"}\n)",
           "format": "time_series",
           "interval": "$interval",
           "intervalFactor": 1,
@@ -414,7 +414,7 @@
           "datasource": {
             "uid": "cfev45eb9c9hcc"
           },
-          "expr": "probe_duration_seconds{job=\"blackbox-http\",instance=~\"$target\"}",
+          "expr": "max without (group) (\nprobe_duration_seconds{job=\"blackbox-http\",instance=~\"$target\"}\n)",
           "format": "time_series",
           "interval": "$interval",
           "intervalFactor": 1,
@@ -512,7 +512,7 @@
           "datasource": {
             "uid": "cfev45eb9c9hcc"
           },
-          "expr": "probe_http_status_code{job=\"blackbox-http\",instance=~\"$target\"}",
+          "expr": "max without (group) (\nprobe_http_status_code{job=\"blackbox-http\",instance=~\"$target\"}\n)",
           "format": "time_series",
           "interval": "$interval",
           "intervalFactor": 1,
@@ -587,7 +587,7 @@
           "datasource": {
             "uid": "cfev45eb9c9hcc"
           },
-          "expr": "probe_http_version{job=\"blackbox-http\",instance=~\"$target\"}",
+          "expr": "max without (group) (\nprobe_http_version{job=\"blackbox-http\",instance=~\"$target\"}\n)",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -682,7 +682,7 @@
           "datasource": {
             "uid": "cfev45eb9c9hcc"
           },
-          "expr": "probe_http_ssl{job=\"blackbox-http\",instance=~\"$target\"}",
+          "expr": "max without (group) (\nprobe_http_ssl{job=\"blackbox-http\",instance=~\"$target\"}\n)",
           "format": "time_series",
           "interval": "$interval",
           "intervalFactor": 1,
@@ -779,7 +779,7 @@
           "datasource": {
             "uid": "cfev45eb9c9hcc"
           },
-          "expr": "probe_ssl_earliest_cert_expiry{job=\"blackbox-http\",instance=~\"$target\"} - time()",
+          "expr": "max without (group) (\nprobe_ssl_earliest_cert_expiry{job=\"blackbox-http\",instance=~\"$target\"} - time()\n)",
           "format": "time_series",
           "interval": "$interval",
           "intervalFactor": 1,
@@ -854,7 +854,7 @@
           "datasource": {
             "uid": "cfev45eb9c9hcc"
           },
-          "expr": "avg(probe_duration_seconds{job=\"blackbox-http\",instance=~\"$target\"})",
+          "expr": "max without (group) (\navg(probe_duration_seconds{job=\"blackbox-http\",instance=~\"$target\"})\n)",
           "format": "time_series",
           "interval": "$interval",
           "intervalFactor": 1,
@@ -929,7 +929,7 @@
           "datasource": {
             "uid": "cfev45eb9c9hcc"
           },
-          "expr": "avg(probe_dns_lookup_time_seconds{job=\"blackbox-http\",instance=~\"$target\"})",
+          "expr": "max without (group) (\navg(probe_dns_lookup_time_seconds{job=\"blackbox-http\",instance=~\"$target\"})\n)",
           "format": "time_series",
           "interval": "$interval",
           "intervalFactor": 1,

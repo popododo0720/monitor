@@ -49,7 +49,7 @@
       },
       "targets": [
         {
-          "expr": "count(up{job=\"snmp\"})",
+          "expr": "max without (group) (\ncount(up{job=\"snmp\"})\n)",
           "instant": true,
           "refId": "A"
         }
@@ -104,7 +104,7 @@
       },
       "targets": [
         {
-          "expr": "count(up{job=\"snmp\"} == 1)",
+          "expr": "max without (group) (\ncount(up{job=\"snmp\"} == 1)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -159,7 +159,7 @@
       },
       "targets": [
         {
-          "expr": "count(up{job=\"snmp\"} == 0) OR on() vector(0)",
+          "expr": "max without (group) (\ncount(up{job=\"snmp\"} == 0) OR on() vector(0)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -214,7 +214,7 @@
       },
       "targets": [
         {
-          "expr": "count(ifOperStatus == 1)",
+          "expr": "max without (group) (\ncount(ifOperStatus == 1)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -269,7 +269,7 @@
       },
       "targets": [
         {
-          "expr": "count(ifOperStatus == 2)",
+          "expr": "max without (group) (\ncount(ifOperStatus == 2)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -324,7 +324,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(ifInErrors[5m]) + rate(ifOutErrors[5m])) OR on() vector(0)",
+          "expr": "max without (group) (\nsum(rate(ifInErrors[5m]) + rate(ifOutErrors[5m])) OR on() vector(0)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -487,43 +487,43 @@
       },
       "targets": [
         {
-          "expr": "max by(instance)(up{job=\"snmp\"})",
+          "expr": "max without (group) (\nmax by(instance)(up{job=\"snmp\"})\n)",
           "format": "table",
           "instant": true,
           "refId": "A"
         },
         {
-          "expr": "count by(instance)(ifOperStatus)",
+          "expr": "max without (group) (\ncount by(instance)(ifOperStatus)\n)",
           "format": "table",
           "instant": true,
           "refId": "B"
         },
         {
-          "expr": "count by(instance)(ifOperStatus == 1)",
+          "expr": "max without (group) (\ncount by(instance)(ifOperStatus == 1)\n)",
           "format": "table",
           "instant": true,
           "refId": "C"
         },
         {
-          "expr": "count by(instance)(ifOperStatus == 2)",
+          "expr": "max without (group) (\ncount by(instance)(ifOperStatus == 2)\n)",
           "format": "table",
           "instant": true,
           "refId": "D"
         },
         {
-          "expr": "sum by(instance)(rate(ifHCInOctets[5m])) * 8",
+          "expr": "max without (group) (\nsum by(instance)(rate(ifHCInOctets[5m])) * 8\n)",
           "format": "table",
           "instant": true,
           "refId": "E"
         },
         {
-          "expr": "sum by(instance)(rate(ifHCOutOctets[5m])) * 8",
+          "expr": "max without (group) (\nsum by(instance)(rate(ifHCOutOctets[5m])) * 8\n)",
           "format": "table",
           "instant": true,
           "refId": "F"
         },
         {
-          "expr": "sum by(instance)(rate(ifInErrors[5m]) + rate(ifOutErrors[5m]))",
+          "expr": "max without (group) (\nsum by(instance)(rate(ifInErrors[5m]) + rate(ifOutErrors[5m]))\n)",
           "format": "table",
           "instant": true,
           "refId": "G"

@@ -50,7 +50,7 @@
       },
       "targets": [
         {
-          "expr": "count(probe_success{job=\"blackbox-http\"})",
+          "expr": "max without (group) (\ncount(probe_success{job=\"blackbox-http\"})\n)",
           "instant": true,
           "refId": "A"
         }
@@ -106,7 +106,7 @@
       },
       "targets": [
         {
-          "expr": "count(probe_success{job=\"blackbox-http\"} == 1)",
+          "expr": "max without (group) (\ncount(probe_success{job=\"blackbox-http\"} == 1)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -162,7 +162,7 @@
       },
       "targets": [
         {
-          "expr": "count(probe_success{job=\"blackbox-http\"} == 0) OR on() vector(0)",
+          "expr": "max without (group) (\ncount(probe_success{job=\"blackbox-http\"} == 0) OR on() vector(0)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -218,7 +218,7 @@
       },
       "targets": [
         {
-          "expr": "avg(probe_duration_seconds{job=\"blackbox-http\"} and probe_success{job=\"blackbox-http\"} == 1) * 1000",
+          "expr": "max without (group) (\navg(probe_duration_seconds{job=\"blackbox-http\"} and probe_success{job=\"blackbox-http\"} == 1) * 1000\n)",
           "instant": true,
           "refId": "A"
         }
@@ -274,7 +274,7 @@
       },
       "targets": [
         {
-          "expr": "max(probe_duration_seconds{job=\"blackbox-http\"} and probe_success{job=\"blackbox-http\"} == 1) * 1000",
+          "expr": "max without (group) (\nmax(probe_duration_seconds{job=\"blackbox-http\"} and probe_success{job=\"blackbox-http\"} == 1) * 1000\n)",
           "instant": true,
           "refId": "A"
         }
@@ -330,7 +330,7 @@
       },
       "targets": [
         {
-          "expr": "avg(avg_over_time(probe_success{job=\"blackbox-http\"}[24h])) * 100",
+          "expr": "max without (group) (\navg(avg_over_time(probe_success{job=\"blackbox-http\"}[24h])) * 100\n)",
           "instant": true,
           "refId": "A"
         }
@@ -646,37 +646,37 @@
       },
       "targets": [
         {
-          "expr": "max by(instance)(probe_success{job=\"blackbox-http\"})",
+          "expr": "max without (group) (\nmax by(instance)(probe_success{job=\"blackbox-http\"})\n)",
           "format": "table",
           "instant": true,
           "refId": "A"
         },
         {
-          "expr": "max by(instance)(probe_http_status_code{job=\"blackbox-http\"})",
+          "expr": "max without (group) (\nmax by(instance)(probe_http_status_code{job=\"blackbox-http\"})\n)",
           "format": "table",
           "instant": true,
           "refId": "B"
         },
         {
-          "expr": "max by(instance)(probe_duration_seconds{job=\"blackbox-http\"}) * 1000",
+          "expr": "max without (group) (\nmax by(instance)(probe_duration_seconds{job=\"blackbox-http\"}) * 1000\n)",
           "format": "table",
           "instant": true,
           "refId": "C"
         },
         {
-          "expr": "max by(instance)((probe_ssl_earliest_cert_expiry{job=\"blackbox-http\"} - time()) / 86400)",
+          "expr": "max without (group) (\nmax by(instance)((probe_ssl_earliest_cert_expiry{job=\"blackbox-http\"} - time()) / 86400)\n)",
           "format": "table",
           "instant": true,
           "refId": "D"
         },
         {
-          "expr": "max by(instance)(avg_over_time(probe_success{job=\"blackbox-http\"}[24h])) * 100",
+          "expr": "max without (group) (\nmax by(instance)(avg_over_time(probe_success{job=\"blackbox-http\"}[24h])) * 100\n)",
           "format": "table",
           "instant": true,
           "refId": "E"
         },
         {
-          "expr": "max by(instance)(avg_over_time(probe_success{job=\"blackbox-http\"}[7d])) * 100",
+          "expr": "max without (group) (\nmax by(instance)(avg_over_time(probe_success{job=\"blackbox-http\"}[7d])) * 100\n)",
           "format": "table",
           "instant": true,
           "refId": "F"

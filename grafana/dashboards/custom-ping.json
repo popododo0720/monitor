@@ -50,7 +50,7 @@
       },
       "targets": [
         {
-          "expr": "count(probe_success{job=\"blackbox-icmp\"})",
+          "expr": "max without (group) (\ncount(probe_success{job=\"blackbox-icmp\"})\n)",
           "instant": true,
           "refId": "A"
         }
@@ -106,7 +106,7 @@
       },
       "targets": [
         {
-          "expr": "count(probe_success{job=\"blackbox-icmp\"} == 1)",
+          "expr": "max without (group) (\ncount(probe_success{job=\"blackbox-icmp\"} == 1)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -162,7 +162,7 @@
       },
       "targets": [
         {
-          "expr": "count(probe_success{job=\"blackbox-icmp\"} == 0) OR on() vector(0)",
+          "expr": "max without (group) (\ncount(probe_success{job=\"blackbox-icmp\"} == 0) OR on() vector(0)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -218,7 +218,7 @@
       },
       "targets": [
         {
-          "expr": "avg(probe_duration_seconds{job=\"blackbox-icmp\"} and probe_success{job=\"blackbox-icmp\"} == 1) * 1000",
+          "expr": "max without (group) (\navg(probe_duration_seconds{job=\"blackbox-icmp\"} and probe_success{job=\"blackbox-icmp\"} == 1) * 1000\n)",
           "instant": true,
           "refId": "A"
         }
@@ -274,7 +274,7 @@
       },
       "targets": [
         {
-          "expr": "max(probe_duration_seconds{job=\"blackbox-icmp\"} and probe_success{job=\"blackbox-icmp\"} == 1) * 1000",
+          "expr": "max without (group) (\nmax(probe_duration_seconds{job=\"blackbox-icmp\"} and probe_success{job=\"blackbox-icmp\"} == 1) * 1000\n)",
           "instant": true,
           "refId": "A"
         }
@@ -330,7 +330,7 @@
       },
       "targets": [
         {
-          "expr": "avg(avg_over_time(probe_success{job=\"blackbox-icmp\"}[24h])) * 100",
+          "expr": "max without (group) (\navg(avg_over_time(probe_success{job=\"blackbox-icmp\"}[24h])) * 100\n)",
           "instant": true,
           "refId": "A"
         }
@@ -566,25 +566,25 @@
       },
       "targets": [
         {
-          "expr": "max by(instance)(probe_success{job=\"blackbox-icmp\"})",
+          "expr": "max without (group) (\nmax by(instance)(probe_success{job=\"blackbox-icmp\"})\n)",
           "format": "table",
           "instant": true,
           "refId": "A"
         },
         {
-          "expr": "max by(instance)(probe_duration_seconds{job=\"blackbox-icmp\"}) * 1000",
+          "expr": "max without (group) (\nmax by(instance)(probe_duration_seconds{job=\"blackbox-icmp\"}) * 1000\n)",
           "format": "table",
           "instant": true,
           "refId": "B"
         },
         {
-          "expr": "max by(instance)(avg_over_time(probe_success{job=\"blackbox-icmp\"}[24h])) * 100",
+          "expr": "max without (group) (\nmax by(instance)(avg_over_time(probe_success{job=\"blackbox-icmp\"}[24h])) * 100\n)",
           "format": "table",
           "instant": true,
           "refId": "C"
         },
         {
-          "expr": "max by(instance)(avg_over_time(probe_success{job=\"blackbox-icmp\"}[7d])) * 100",
+          "expr": "max without (group) (\nmax by(instance)(avg_over_time(probe_success{job=\"blackbox-icmp\"}[7d])) * 100\n)",
           "format": "table",
           "instant": true,
           "refId": "D"

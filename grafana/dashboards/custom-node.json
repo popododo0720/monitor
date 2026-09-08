@@ -50,7 +50,7 @@
       },
       "targets": [
         {
-          "expr": "count(up{job=\"node-exporter\"})",
+          "expr": "max without (group) (\ncount(up{job=\"node-exporter\"})\n)",
           "instant": true,
           "refId": "A"
         }
@@ -106,7 +106,7 @@
       },
       "targets": [
         {
-          "expr": "count(up{job=\"node-exporter\"} == 1)",
+          "expr": "max without (group) (\ncount(up{job=\"node-exporter\"} == 1)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -162,7 +162,7 @@
       },
       "targets": [
         {
-          "expr": "count(up{job=\"node-exporter\"} == 0) OR on() vector(0)",
+          "expr": "max without (group) (\ncount(up{job=\"node-exporter\"} == 0) OR on() vector(0)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -225,7 +225,7 @@
       },
       "targets": [
         {
-          "expr": "count(avg by(instance)(100 - rate(node_cpu_seconds_total{job=\"node-exporter\",mode=\"idle\"}[5m]) * 100) > 80) OR on() vector(0)",
+          "expr": "max without (group) (\ncount(avg by(instance)(100 - rate(node_cpu_seconds_total{job=\"node-exporter\",mode=\"idle\"}[5m]) * 100) > 80) OR on() vector(0)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -288,7 +288,7 @@
       },
       "targets": [
         {
-          "expr": "count(((1 - node_memory_MemAvailable_bytes{job=\"node-exporter\"} / node_memory_MemTotal_bytes{job=\"node-exporter\"}) * 100) > 80) OR on() vector(0)",
+          "expr": "max without (group) (\ncount(((1 - node_memory_MemAvailable_bytes{job=\"node-exporter\"} / node_memory_MemTotal_bytes{job=\"node-exporter\"}) * 100) > 80) OR on() vector(0)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -351,7 +351,7 @@
       },
       "targets": [
         {
-          "expr": "count((max by(instance)((1 - node_filesystem_avail_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"tmpfs\"}) * 100)) > 80) OR on() vector(0)",
+          "expr": "max without (group) (\ncount((max by(instance)((1 - node_filesystem_avail_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"tmpfs\"}) * 100)) > 80) OR on() vector(0)\n)",
           "instant": true,
           "refId": "A"
         }
@@ -663,49 +663,49 @@
       },
       "targets": [
         {
-          "expr": "max by(instance)(up{job=\"node-exporter\"})",
+          "expr": "max without (group) (\nmax by(instance)(up{job=\"node-exporter\"})\n)",
           "format": "table",
           "instant": true,
           "refId": "A"
         },
         {
-          "expr": "avg by(instance)(100 - rate(node_cpu_seconds_total{job=\"node-exporter\",mode=\"idle\"}[5m]) * 100)",
+          "expr": "max without (group) (\navg by(instance)(100 - rate(node_cpu_seconds_total{job=\"node-exporter\",mode=\"idle\"}[5m]) * 100)\n)",
           "format": "table",
           "instant": true,
           "refId": "B"
         },
         {
-          "expr": "max by(instance)((1 - node_memory_MemAvailable_bytes{job=\"node-exporter\"} / node_memory_MemTotal_bytes{job=\"node-exporter\"}) * 100)",
+          "expr": "max without (group) (\nmax by(instance)((1 - node_memory_MemAvailable_bytes{job=\"node-exporter\"} / node_memory_MemTotal_bytes{job=\"node-exporter\"}) * 100)\n)",
           "format": "table",
           "instant": true,
           "refId": "C"
         },
         {
-          "expr": "max by(instance)((1 - node_filesystem_avail_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"tmpfs\"}) * 100)",
+          "expr": "max without (group) (\nmax by(instance)((1 - node_filesystem_avail_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"tmpfs\"}) * 100)\n)",
           "format": "table",
           "instant": true,
           "refId": "D"
         },
         {
-          "expr": "max by(instance)(node_memory_MemTotal_bytes{job=\"node-exporter\"})",
+          "expr": "max without (group) (\nmax by(instance)(node_memory_MemTotal_bytes{job=\"node-exporter\"})\n)",
           "format": "table",
           "instant": true,
           "refId": "E"
         },
         {
-          "expr": "max by(instance)(node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"tmpfs\"})",
+          "expr": "max without (group) (\nmax by(instance)(node_filesystem_size_bytes{job=\"node-exporter\",mountpoint=\"/\",fstype!=\"tmpfs\"})\n)",
           "format": "table",
           "instant": true,
           "refId": "F"
         },
         {
-          "expr": "max by(instance)((time() - node_boot_time_seconds{job=\"node-exporter\"}) / 86400)",
+          "expr": "max without (group) (\nmax by(instance)((time() - node_boot_time_seconds{job=\"node-exporter\"}) / 86400)\n)",
           "format": "table",
           "instant": true,
           "refId": "G"
         },
         {
-          "expr": "max by(instance)(node_load1{job=\"node-exporter\"})",
+          "expr": "max without (group) (\nmax by(instance)(node_load1{job=\"node-exporter\"})\n)",
           "format": "table",
           "instant": true,
           "refId": "H"
