@@ -210,8 +210,11 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "textMode": "value",
+        "wideLayout": true,
+        "text": {
+          "valueSize": 36
+        }
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -503,8 +506,11 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "textMode": "value",
+        "wideLayout": true,
+        "text": {
+          "valueSize": 36
+        }
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -578,8 +584,11 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "textMode": "value",
+        "wideLayout": true,
+        "text": {
+          "valueSize": 36
+        }
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -673,8 +682,11 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "textMode": "value",
+        "wideLayout": true,
+        "text": {
+          "valueSize": 36
+        }
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -770,8 +782,11 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "textMode": "value",
+        "wideLayout": true,
+        "text": {
+          "valueSize": 36
+        }
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -845,8 +860,11 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "textMode": "value",
+        "wideLayout": true,
+        "text": {
+          "valueSize": 36
+        }
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -920,8 +938,11 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "textMode": "value",
+        "wideLayout": true,
+        "text": {
+          "valueSize": 36
+        }
       },
       "pluginVersion": "12.4.0",
       "targets": [
