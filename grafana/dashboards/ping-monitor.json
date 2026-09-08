@@ -372,7 +372,7 @@
           "type": "prometheus",
           "uid": "cfev45eb9c9hcc"
         },
-        "definition": "label_values(probe_icmp_duration_seconds{job=~\"$job\"},instance)",
+        "definition": "query_result(max by(instance) (probe_success{job=~\"$job\"}))",
         "includeAll": true,
         "label": "instance",
         "multi": true,
@@ -380,11 +380,11 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(probe_icmp_duration_seconds{job=~\"$job\"},instance)",
+          "query": "query_result(max by(instance) (probe_success{job=~\"$job\"}))",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "",
+        "regex": "/instance=\"([^\"]+)\"/",
         "regexApplyTo": "value",
         "type": "query"
       }
