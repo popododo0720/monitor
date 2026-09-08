@@ -188,7 +188,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 4,
         "x": 0,
         "y": 9
@@ -291,7 +291,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 9,
         "w": 10,
         "x": 4,
         "y": 9
@@ -389,7 +389,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 9,
         "w": 10,
         "x": 14,
         "y": 9
@@ -481,10 +481,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 4,
         "x": 0,
-        "y": 11
+        "y": 12
       },
       "id": 20,
       "maxDataPoints": 100,
@@ -557,10 +557,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 4,
         "x": 0,
-        "y": 13
+        "y": 15
       },
       "id": 27,
       "maxDataPoints": 100,
@@ -651,10 +651,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 4,
         "x": 0,
-        "y": 15
+        "y": 18
       },
       "id": 18,
       "maxDataPoints": 100,
@@ -748,10 +748,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 10,
         "x": 4,
-        "y": 15
+        "y": 18
       },
       "id": 19,
       "maxDataPoints": 100,
@@ -824,10 +824,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 5,
         "x": 14,
-        "y": 15
+        "y": 18
       },
       "id": 23,
       "maxDataPoints": 100,
@@ -899,10 +899,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 5,
         "x": 19,
-        "y": 15
+        "y": 18
       },
       "id": 24,
       "maxDataPoints": 100,
