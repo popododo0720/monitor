@@ -372,7 +372,7 @@
           "type": "prometheus",
           "uid": "cfev45eb9c9hcc"
         },
-        "definition": "query_result(max by(instance) (probe_success{job=~\"$job\"}))",
+        "definition": "query_result(max by(instance) (max_over_time(probe_success{job=~\"$job\"}[${__range_s}s] @ ${__to:date:seconds})))",
         "includeAll": true,
         "label": "instance",
         "multi": true,
@@ -380,10 +380,10 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "query_result(max by(instance) (probe_success{job=~\"$job\"}))",
+          "query": "query_result(max by(instance) (max_over_time(probe_success{job=~\"$job\"}[${__range_s}s] @ ${__to:date:seconds})))",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "/instance=\"([^\"]+)\"/",
         "regexApplyTo": "value",
         "type": "query"
