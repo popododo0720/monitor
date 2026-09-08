@@ -211,10 +211,7 @@
         },
         "showPercentChange": false,
         "textMode": "value",
-        "wideLayout": true,
-        "text": {
-          "valueSize": 28
-        }
+        "wideLayout": true
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -507,10 +504,7 @@
         },
         "showPercentChange": false,
         "textMode": "value",
-        "wideLayout": true,
-        "text": {
-          "valueSize": 28
-        }
+        "wideLayout": true
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -585,10 +579,7 @@
         },
         "showPercentChange": false,
         "textMode": "value",
-        "wideLayout": true,
-        "text": {
-          "valueSize": 28
-        }
+        "wideLayout": true
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -683,10 +674,7 @@
         },
         "showPercentChange": false,
         "textMode": "value",
-        "wideLayout": true,
-        "text": {
-          "valueSize": 28
-        }
+        "wideLayout": true
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -783,10 +771,7 @@
         },
         "showPercentChange": false,
         "textMode": "value",
-        "wideLayout": true,
-        "text": {
-          "valueSize": 28
-        }
+        "wideLayout": true
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -861,10 +846,7 @@
         },
         "showPercentChange": false,
         "textMode": "value",
-        "wideLayout": true,
-        "text": {
-          "valueSize": 28
-        }
+        "wideLayout": true
       },
       "pluginVersion": "12.4.0",
       "targets": [
@@ -939,10 +921,7 @@
         },
         "showPercentChange": false,
         "textMode": "value",
-        "wideLayout": true,
-        "text": {
-          "valueSize": 28
-        }
+        "wideLayout": true
       },
       "pluginVersion": "12.4.0",
       "targets": [
